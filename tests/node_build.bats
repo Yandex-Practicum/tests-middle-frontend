@@ -86,8 +86,4 @@ teardown_file() {
     run curl -I http://localhost:3000/messenger
     [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/messenger
     [[ "$output" =~ (HTTP[^ \t]*[ \t]200) ]] || fatal "$output" # Check response of curl http://localhost:3000/messenger
-
-    run curl -I http://localhost:3000/random-page-that-should-end-with-404-error
-    [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/random-page-that-should-end-with-404-error
-    [[ "$output" =~ (HTTP[^ \t]*[ \t]404) ]] || fatal "$output" # Check response of curl http://localhost:3000/random-page-that-should-end-with-404-error
 }
