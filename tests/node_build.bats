@@ -63,3 +63,4 @@ teardown_file() {
 @test "Run npm run build" {
     run npm run build
     [ "$status" -eq 0 ] || fatal "$output" # npm run build
+}
