@@ -13,7 +13,7 @@ load utils/startup.bash
         fatal "tsconfig.json required" # Check tsconfig.json in project directory
     fi
 
-    run jq <tsconfig.json ""
+    run jq <tsconfig.json "."
     [ "$status" -eq 0 ] || fatal "$output" "$(cat tsconfig.json)" # Validate json file: tsconfig.json
 
     run jq <tsconfig.json "(.compilerOptions.noImplicitAny | contains(true))"
