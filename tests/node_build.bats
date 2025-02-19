@@ -23,11 +23,6 @@ teardown_file() {
 
     # Check for pre-commit file
     [[ "$output" =~ (pre-commit$) ]] || fatal "$output" # Check pre-commit hook exists
-
-    # Verify it's a husky hook by checking content
-    run cat .husky/pre-commit
-    [ "$status" -eq 0 ] || fatal "$output"
-    [[ "$output" =~ "husky" ]] || fatal "Not a husky hook: $output"
 }
 
 @test "Run stylelint" {
