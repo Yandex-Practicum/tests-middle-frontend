@@ -14,9 +14,20 @@ teardown_file() {
         skip
     fi
 
-    run ls -1 `git rev-parse --git-path hooks`
+    # Check if .husky directory exists
+    [ -d ".husky" ] || fatal "No .husky directory found"
+
+    # List contents of .husky directory
+    run ls -1 .husky
     [ "$status" -eq 0 ] || fatal "$output" # list hooks
-    [[ "$output" =~ (pre-commit$) ]] || fatal "$output" # Check pre-commit hook
+
+    # Check for pre-commit file
+    [[ "$output" =~ (pre-commit$) ]] || fatal "$output" # Check pre-commit hook exists
+
+    # Verify it's a husky hook by checking content
+    run cat .husky/pre-commit
+    [ "$status" -eq 0 ] || fatal "$output"
+    [[ "$output" =~ "husky" ]] || fatal "Not a husky hook: $output"
 }
 
 @test "Run stylelint" {
