@@ -1,10 +1,10 @@
 load utils/startup.bash
 
-@test "Check mocha in devDependencies" {
-    run jq <package.json "(.dependencies.mocha | length)"
+@test "Check mocha or jest in devDependencies" {
+    run jq <package.json "(.dependencies.mocha + .dependencies.jest | length)"
     [ "$output" -eq 0 ] || fatal "$(cat package.json)" # mocha should be only in devDependencies, not in dependencies
 
-    run jq <package.json "(.devDependencies.mocha | length)"
+    run jq <package.json "(.devDependencies.mocha + .dependencies.jest | length)"
     [ "$output" -ne 0 ] || fatal "$(cat package.json)" # mocha in package.json
 }
 
