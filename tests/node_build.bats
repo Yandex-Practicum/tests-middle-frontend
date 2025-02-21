@@ -14,9 +14,15 @@ teardown_file() {
         skip
     fi
 
-    run ls -1 `git rev-parse --git-path hooks`
+    # Check if .husky directory exists
+    [ -d ".husky" ] || fatal "No .husky directory found"
+
+    # List contents of .husky directory
+    run ls -1 .husky
     [ "$status" -eq 0 ] || fatal "$output" # list hooks
-    [[ "$output" =~ (pre-commit$) ]] || fatal "$output" # Check pre-commit hook
+
+    # Check for pre-commit file
+    [[ "$output" =~ (pre-commit$) ]] || fatal "$output" # Check pre-commit hook exists
 }
 
 @test "Run stylelint" {
@@ -33,6 +39,7 @@ teardown_file() {
     local count=`ls -1a .eslintrc* | wc -l`
     if [ $count != 0 ]; then
         run npx eslint "**/*.{js,ts}" \
+        --plugin @typescript-eslint \
         --rule "@typescript-eslint/ban-ts-comment: error"
 
         [ "$status" -eq 0 ] || fatal "$output" # Lint js
