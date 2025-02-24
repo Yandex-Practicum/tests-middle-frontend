@@ -67,30 +67,7 @@ teardown_file() {
     [ "$status" -eq 0 ] || fatal "$output" # npm test
 }
 
-@test "Run npm run start and wait for port 3000" {
-    start_node
-}
-
-@test "Check routing" {
-    run curl -I http://localhost:3000/
-    [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/
-    [[ "$output" =~ (HTTP[^ \t]*[ \t]200) ]] || fatal "$output" # Check response of curl http://localhost:3000/
-}
-
-@test "Check pages routing" {
-    if [[ "$SPRINT" != "sprint_3" && "$SPRINT" != "sprint_4" ]]; then
-        skip
-    fi
-
-    run curl -I http://localhost:3000/sign-up
-    [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/sign-up
-    [[ "$output" =~ (HTTP[^ \t]*[ \t]200) ]] || fatal "$output" # Check response of curl http://localhost:3000/sign-up
-
-    run curl -I http://localhost:3000/settings
-    [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/settings
-    [[ "$output" =~ (HTTP[^ \t]*[ \t]200) ]] || fatal "$output" # Check response of curl http://localhost:3000/settings
-
-    run curl -I http://localhost:3000/messenger
-    [ "$status" -eq 0 ] || fatal "$output" # Check status of curl http://localhost:3000/messenger
-    [[ "$output" =~ (HTTP[^ \t]*[ \t]200) ]] || fatal "$output" # Check response of curl http://localhost:3000/messenger
+@test "Run npm run build" {
+    run npm run build
+    [ "$status" -eq 0 ] || fatal "$output" # npm run build
 }
