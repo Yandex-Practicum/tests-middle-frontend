@@ -1,27 +1,37 @@
 load utils/startup.bash
 
-@test "Check mocha or jest in devDependencies" {
-    run jq <package.json "(.dependencies.mocha + .dependencies.jest | length)"
-    [ "$output" -eq 0 ] || fatal "$(cat package.json)" # mocha should be only in devDependencies, not in dependencies
-
-    run jq <package.json "(.devDependencies.mocha + .dependencies.jest | length)"
-    [ "$output" -ne 0 ] || fatal "$(cat package.json)" # mocha in package.json
+@test "Check testing libraries are in devDependencies only" {
+    # Ensure mocha, jest, and chai are NOT in regular dependencies
+    run jq <package.json "(.dependencies.mocha // null, .dependencies.jest // null, .dependencies.chai // null) | select(. != null)"
+    [ "$output" = "" ] || fatal "Testing libraries should not be in dependencies: $(cat package.json)"
 }
 
-@test "Check chai in devDependencies if using mocha" {
-    # First check if mocha is present in devDependencies
-    run jq <package.json ".devDependencies.mocha"
-    if [ "$output" != "null" ]; then
-        # If using mocha, check chai is not in dependencies
-        run jq <package.json "(.dependencies.chai | length)"
-        [ "$output" -eq 0 ] || fatal "$(cat package.json)" # chai should be only in devDependencies
-        
-        # And chai must be in devDependencies
-        run jq <package.json "(.devDependencies.chai | length)"
-        [ "$output" -ne 0 ] || fatal "$(cat package.json)" # chai must be in devDependencies when using mocha
+@test "Check either mocha+chai or jest setup exists" {
+    # Check if mocha is in devDependencies
+    run jq <package.json ".devDependencies.mocha // null"
+    mocha_present=$([[ "$output" != "null" ]] && echo "yes" || echo "no")
+    
+    # Check if jest is in devDependencies  
+    run jq <package.json ".devDependencies.jest // null"
+    jest_present=$([[ "$output" != "null" ]] && echo "yes" || echo "no")
+    
+    # Check if chai is in devDependencies
+    run jq <package.json ".devDependencies.chai // null"
+    chai_present=$([[ "$output" != "null" ]] && echo "yes" || echo "no")
+    
+    # Validate scenarios
+    if [[ "$mocha_present" == "yes" && "$jest_present" == "yes" ]]; then
+        fatal "Both mocha and jest found. Please use only one testing framework: $(cat package.json)"
+    elif [[ "$mocha_present" == "yes" ]]; then
+        # Using mocha - chai must be present
+        [[ "$chai_present" == "yes" ]] || fatal "When using mocha, chai must be in devDependencies: $(cat package.json)"
+        echo "✓ Using mocha + chai setup"
+    elif [[ "$jest_present" == "yes" ]]; then
+        # Using jest - chai should not be present (jest has built-in assertions)
+        [[ "$chai_present" == "no" ]] || echo "⚠ Warning: Using jest with chai is unusual but allowed"
+        echo "✓ Using jest setup"
     else
-        # If not using mocha (presumably using jest), skip chai checks
-        echo "Using Jest - skipping chai dependency check"
+        fatal "No testing framework found. Please install either 'mocha + chai' or 'jest' in devDependencies: $(cat package.json)"
     fi
 }
 
